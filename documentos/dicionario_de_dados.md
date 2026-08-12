@@ -144,16 +144,7 @@ sellers.seller_zip_code_prefix     ──> geolocation
 
 ### Modelo Dimensional (`data/processado/`, gerado pelo notebook 02)
 
-Grão da tabela fato: um item de pedido por linha.
-
-```
-dim_clientes ──< fato_pedidos >── dim_produtos
-                    │
-                    ├──> dim_vendedores
-                    └──> dim_tempo (via order_purchase_timestamp)
-
-dim_geolocalizacao (agregada por zip_code_prefix, uma linha por CEP)
-```
+![Modelo Dimensional — star schema com fato_pedidos no centro e as cinco dimensões ao redor](modelo_dimensional.svg)
 
 | Tabela | Grão | Principais colunas |
 |---|---|---|

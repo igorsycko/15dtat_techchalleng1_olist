@@ -1,0 +1,73 @@
+<svg viewBox="0 0 820 700" xmlns="http://www.w3.org/2000/svg" font-family="Helvetica, Arial, sans-serif">
+  <!-- fundo -->
+  <rect x="0" y="0" width="820" height="700" fill="#ffffff"/>
+
+  <!-- titulo -->
+  <text x="410" y="34" text-anchor="middle" font-size="20" font-weight="700" fill="#1f2937">Modelo Dimensional — data/processado/</text>
+  <text x="410" y="56" text-anchor="middle" font-size="13" fill="#64748b">Grão da tabela fato: um item de pedido por linha</text>
+
+  <!-- ===== conectores (desenhados antes das caixas, para ficarem por baixo) ===== -->
+  <!-- fato -> dim_tempo -->
+  <line x1="400" y1="270" x2="400" y2="145" stroke="#475569" stroke-width="2"/>
+  <!-- fato -> dim_produtos -->
+  <line x1="500" y1="325" x2="585" y2="325" stroke="#475569" stroke-width="2"/>
+  <!-- fato -> dim_clientes -->
+  <line x1="300" y1="325" x2="220" y2="325" stroke="#475569" stroke-width="2"/>
+  <!-- fato -> dim_vendedores -->
+  <line x1="400" y1="380" x2="400" y2="475" stroke="#475569" stroke-width="2"/>
+
+  <!-- dim_clientes -> dim_geolocalizacao (tracejado, via zip_code_prefix) -->
+  <line x1="165" y1="375" x2="600" y2="595" stroke="#94a3b8" stroke-width="2" stroke-dasharray="6,5"/>
+  <!-- dim_vendedores -> dim_geolocalizacao (tracejado, via zip_code_prefix) -->
+  <line x1="470" y1="545" x2="615" y2="580" stroke="#94a3b8" stroke-width="2" stroke-dasharray="6,5"/>
+
+  <!-- rotulos dos relacionamentos -->
+  <text x="400" y="200" text-anchor="middle" font-size="11" fill="#64748b">order_purchase_timestamp</text>
+  <text x="540" y="315" text-anchor="middle" font-size="11" fill="#64748b">product_id</text>
+  <text x="260" y="315" text-anchor="middle" font-size="11" fill="#64748b">customer_id</text>
+  <text x="400" y="435" text-anchor="middle" font-size="11" fill="#64748b">seller_id</text>
+  <text x="330" y="640" text-anchor="middle" font-size="10.5" fill="#94a3b8">zip_code_prefix (indireto)</text>
+
+  <!-- ===== tabela fato (centro) ===== -->
+  <rect x="300" y="270" width="200" height="110" rx="8" fill="#1f2937"/>
+  <text x="400" y="308" text-anchor="middle" font-size="16" font-weight="700" fill="#ffffff">fato_pedidos</text>
+  <text x="400" y="329" text-anchor="middle" font-size="11" fill="#cbd5e1">1 item de pedido</text>
+  <text x="400" y="349" text-anchor="middle" font-size="10.5" fill="#94a3b8">price · freight_value</text>
+  <text x="400" y="365" text-anchor="middle" font-size="10.5" fill="#94a3b8">order_status · atrasado</text>
+
+  <!-- ===== dim_tempo (topo) ===== -->
+  <rect x="300" y="75" width="200" height="70" rx="8" fill="#eef2f7" stroke="#334155" stroke-width="1.5"/>
+  <text x="400" y="100" text-anchor="middle" font-size="14" font-weight="700" fill="#1f2937">dim_tempo</text>
+  <text x="400" y="118" text-anchor="middle" font-size="10.5" fill="#64748b">1 data</text>
+  <text x="400" y="134" text-anchor="middle" font-size="9.5" fill="#94a3b8">ano · mes · dia</text>
+
+  <!-- ===== dim_produtos (direita) ===== -->
+  <rect x="585" y="290" width="190" height="70" rx="8" fill="#eef2f7" stroke="#334155" stroke-width="1.5"/>
+  <text x="680" y="315" text-anchor="middle" font-size="14" font-weight="700" fill="#1f2937">dim_produtos</text>
+  <text x="680" y="333" text-anchor="middle" font-size="10.5" fill="#64748b">1 produto</text>
+  <text x="680" y="349" text-anchor="middle" font-size="9.5" fill="#94a3b8">categoria · peso · dimensões</text>
+
+  <!-- ===== dim_clientes (esquerda) ===== -->
+  <rect x="30" y="290" width="190" height="70" rx="8" fill="#eef2f7" stroke="#334155" stroke-width="1.5"/>
+  <text x="125" y="315" text-anchor="middle" font-size="14" font-weight="700" fill="#1f2937">dim_clientes</text>
+  <text x="125" y="333" text-anchor="middle" font-size="10.5" fill="#64748b">1 cliente-pedido</text>
+  <text x="125" y="349" text-anchor="middle" font-size="9.5" fill="#94a3b8">cidade · estado</text>
+
+  <!-- ===== dim_vendedores (base) ===== -->
+  <rect x="300" y="475" width="200" height="70" rx="8" fill="#eef2f7" stroke="#334155" stroke-width="1.5"/>
+  <text x="400" y="500" text-anchor="middle" font-size="14" font-weight="700" fill="#1f2937">dim_vendedores</text>
+  <text x="400" y="518" text-anchor="middle" font-size="10.5" fill="#64748b">1 vendedor</text>
+  <text x="400" y="534" text-anchor="middle" font-size="9.5" fill="#94a3b8">cidade · estado</text>
+
+  <!-- ===== dim_geolocalizacao (canto inferior direito, relação indireta) ===== -->
+  <rect x="600" y="580" width="190" height="70" rx="8" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="5,4"/>
+  <text x="695" y="605" text-anchor="middle" font-size="14" font-weight="700" fill="#475569">dim_geolocalizacao</text>
+  <text x="695" y="623" text-anchor="middle" font-size="10.5" fill="#64748b">1 CEP</text>
+  <text x="695" y="639" text-anchor="middle" font-size="9.5" fill="#94a3b8">lat/lng médios</text>
+
+  <!-- legenda -->
+  <line x1="45" y1="675" x2="75" y2="675" stroke="#475569" stroke-width="2"/>
+  <text x="82" y="679" font-size="10.5" fill="#475569">relação direta (chave em fato_pedidos)</text>
+  <line x1="360" y1="675" x2="390" y2="675" stroke="#94a3b8" stroke-width="2" stroke-dasharray="6,5"/>
+  <text x="397" y="679" font-size="10.5" fill="#64748b">relação indireta (via zip_code_prefix)</text>
+</svg>
