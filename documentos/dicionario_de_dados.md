@@ -224,7 +224,7 @@ escolhas técnicas junto aos professores, no vídeo executivo ou na apresentaç�
 | Tabela fato no grão de item de pedido (`fato_pedidos`), não de pedido | É o nível mais detalhado disponível — dá para agregar por pedido, por dia, por categoria etc. depois, sem perder informação; grão mais alto (pedido) perderia o detalhe de item |
 | Deixar `payment_value` fora da tabela fato | `order_payments` está no grão de pedido; juntar direto ao grão de item duplicaria o valor pago em pedidos com mais de um item |
 | Agregar `geolocation` por `zip_code_prefix` (média de lat/lng) antes de virar dimensão | A tabela original tem várias linhas por CEP; sem agregar, `dim_geolocalizacao` teria duplicidade e quebraria qualquer join 1-para-1 com clientes/vendedores |
-| Usar um `.gitignore` local em `data/base/` e `data/processado/`, em vez de `.gitkeep` | Arquivo oculto (`.gitkeep`, começa com ponto) pode ser ignorado ao arrastar a pasta pelo Finder/upload web em alguns sistemas, fazendo a pasta "sumir" no GitHub; um `.gitignore` com conteúdo real resolve isso e documenta a própria regra de exclusão dos CSVs |
+| Usar `.gitkeep` (arquivo vazio) em `data/base/` e `data/processado/` | Garante que essas pastas apareçam no repositório mesmo sem CSVs versionados — o Git não rastreia pastas vazias por padrão |
 | Comparar cada par de datas sequenciais de `orders` (compra/aprovação/postagem/entrega) | Confirma a ordem lógica dos timestamps; identificou 1.382 pedidos com alguma inconsistência pontual, volume baixo o suficiente para não comprometer análises agregadas |
 
 **Como isso atende aos critérios de avaliação:**
