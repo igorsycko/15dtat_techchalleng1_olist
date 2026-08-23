@@ -4,7 +4,8 @@ Documentação de referência das 9 tabelas do dataset e das decisões técnicas
 notebooks de compreensão e preparação dos dados. Fonte: [Kaggle — Brazilian E-Commerce
 Public Dataset by Olist](https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce).
 
-Validado com os dados reais em 11/08/2026. Tipos, volumetria, nulos e
+Validado com os dados reais em 11/08/2026, com os KPIs consolidados a partir
+do notebook `03_kpis_principais.ipynb`. Tipos, volumetria, nulos e
 cardinalidade refletem os CSVs carregados em `data/base/`. Detalhamento completo
 por coluna em `documentos/data_quality_summary.csv`.
 
@@ -77,7 +78,7 @@ Achado: média de 1,14 item por pedido (máximo 21) — a maioria dos pedidos te
 |---|---|---|---|
 | review_id | texto | ID da avaliação | PK |
 | order_id | texto | Referência ao pedido | FK → orders |
-| review_score | inteiro (1–5) | Nota do cliente — média geral 4,09 | — |
+| review_score | inteiro (1–5) | Nota do cliente — média geral 4,16 (pedidos entregues, ver seção 3) | — |
 | review_comment_title | texto | Título do comentário — 88,3% nulos (campo opcional) | — |
 | review_comment_message | texto | Corpo do comentário — 58,7% nulos (campo opcional) | — |
 | review_creation_date | datetime | Data de envio da pesquisa de satisfação | — |
@@ -162,19 +163,57 @@ por `order_id` separadamente.
 
 ---
 
-## 3. Achados Iniciais da EDA
+## 3. KPIs e Achados Principais
 
-Primeiro esboço de resposta à pergunta norteadora, a partir da exploração
-inicial dos dados:
+Calculados no notebook `03_kpis_principais.ipynb`, a partir de `data/processado/`
+(mais rigoroso que uma exploração inicial: usa a tabela fato já modelada e
+deduplica por pedido antes de calcular médias de logística/satisfação, para não
+inflar pedidos com mais de um item). Base: 98.666 pedidos únicos, jan/2017 a
+ago/2018.
 
-| Achado | Valor | Relevância |
-|---|---|---|
-| Receita concentrada | SP responde por ~46% da receita (R$ 5,2M de ~R$ 11,3M) | Trilha Crescimento — risco de concentração geográfica |
-| Top categoria | health_beauty (R$ 1,26M), seguida de watches_gifts e bed_bath_table | Trilha Crescimento |
-| Lead time médio | 12,1 dias (compra → entrega, pedidos `delivered`) | Trilha Logística |
-| % pedidos atrasados | 6,8% chegam depois da data estimada | Trilha Logística |
-| Atraso x satisfação | Nota média 4,29 (no prazo) vs. 2,27 (atrasado) | Achado mais forte — liga as duas trilhas |
-| Recompra | Apenas 3,36% dos "clientes-pedido" repetem compra | Risco para a narrativa de crescimento sustentável |
+### Crescimento e Receita
+
+| KPI | Valor |
+|---|---|
+| Receita total | R$ 13.591.643,70 |
+| Crescimento médio mês a mês | 14,2% |
+| Ticket médio geral (AOV) | R$ 137,75 |
+| Top 5 categorias (% da receita) | 39,7% — health_beauty (R$ 1,26M), watches_gifts, bed_bath_table, sports_leisure, computers_accessories |
+| Concentração em SP | 38,3% da receita (R$ 5,2M de R$ 13,59M) |
+| Top 10 sellers (% da receita) | 13,1%, de 3.095 sellers no total |
+| Taxa de recompra | 3,36% |
+
+### Logística e SLA
+
+| KPI | Valor |
+|---|---|
+| Lead time médio (compra → entrega) | 12,1 dias |
+| Pedidos no prazo (SLA compliance) | 91,9% (8,1% atrasados) |
+| Atraso médio, entre os atrasados | 8,9 dias (7.826 pedidos) |
+| Piores estados por lead time | RR (29,0d), AP (26,7d), AM (26,0d), AL (24,0d), PA (23,3d) |
+| Frete médio | R$ 19,99 |
+| Frete / preço | 16,6% |
+
+### Satisfação
+
+| KPI | Valor |
+|---|---|
+| Nota média geral | 4,16 |
+| Nota média — pedidos no prazo | 4,29 |
+| Nota média — pedidos atrasados | 2,57 |
+| Avaliações negativas (nota ≤ 2) | 12,8% |
+
+### KPI Executivo Combinado — Receita em Risco por Atraso Logístico
+
+Receita de pedidos atrasados, ponderada pela queda percentual na nota de
+avaliação (proxy de risco de não-recompra) — conecta as duas trilhas em uma
+única cifra financeira:
+
+| Componente | Valor |
+|---|---|
+| Receita em pedidos atrasados | R$ 1.158.920,51 |
+| Queda percentual na nota (atrasado vs. no prazo) | 40,2% |
+| **Receita em risco** | **R$ 466.199,44** |
 
 Lembrete de correlação x causalidade (Aula 1 de Estatística): a diferença de
 nota entre pedidos no prazo e atrasados é grande e provavelmente relevante, mas
@@ -199,9 +238,10 @@ fatores (categoria, região, valor do pedido) podem influenciar os dois lados.
 
 ## 5. Racional Técnico dos Notebooks
 
-Resumo das principais decisões de código dos notebooks `01_compreensao_dos_dados.ipynb`
-e `02_preparacao_dos_dados.ipynb`, e por que foram tomadas — apoio para justificar
-escolhas técnicas junto aos professores, no vídeo executivo ou na apresentação.
+Resumo das principais decisões de código dos notebooks `01_compreensao_dos_dados.ipynb`,
+`02_preparacao_dos_dados.ipynb` e `03_kpis_principais.ipynb`, e por que foram tomadas —
+apoio para justificar escolhas técnicas junto aos professores, no vídeo executivo ou na
+apresentação.
 
 | Decisão | Racional |
 |---|---|
@@ -217,6 +257,9 @@ escolhas técnicas junto aos professores, no vídeo executivo ou na apresentaç�
 | Agregar `geolocation` por `zip_code_prefix` (média de lat/lng) antes de virar dimensão | A tabela original tem várias linhas por CEP; sem agregar, `dim_geolocalizacao` teria duplicidade e quebraria qualquer join 1-para-1 com clientes/vendedores |
 | Usar `.gitkeep` (arquivo vazio) em `data/base/` e `data/processado/` | Garante que essas pastas apareçam no repositório mesmo sem CSVs versionados — o Git não rastreia pastas vazias por padrão |
 | Comparar cada par de datas sequenciais de `orders` (compra/aprovação/postagem/entrega) | Confirma a ordem lógica dos timestamps; identificou 1.382 pedidos com alguma inconsistência pontual, volume baixo o suficiente para não comprometer análises agregadas |
+| Carregar `order_reviews` direto de `data/base/`, não de `data/processado/` | `review_score` ainda não faz parte do modelo dimensional; evita modelar uma tabela nova só para este cálculo pontual |
+| Deduplicar `fato_pedidos` por `order_id` antes de calcular KPIs de pedido (lead time, atraso, nota) | `fato_pedidos` está no grão de item; sem deduplicar, pedidos com mais de um item pesariam mais nas médias — inflando ou distorcendo o resultado |
+| Excluir set-dez/2016 e set-out/2018 do cálculo de crescimento mês a mês | Volume quase nulo nesses meses (já documentado na Cobertura Temporal) distorceria a taxa de crescimento se incluído |
 
 **Como isso atende aos critérios de avaliação:**
 
