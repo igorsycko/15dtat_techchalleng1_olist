@@ -33,7 +33,8 @@ tech-challenge-olist/
 │   └── processado/      # Tabela fato e dimensões geradas pelo notebook 02 (não versionadas no Git)
 ├── notebooks/
 │   ├── 01_compreensao_dos_dados.ipynb
-│   └── 02_preparacao_dos_dados.ipynb
+│   ├── 02_preparacao_dos_dados.ipynb
+│   └── 03_kpis_principais.ipynb
 ├── documentos/
 │   ├── dicionario_de_dados.md
 │   └── data_quality_summary.csv
