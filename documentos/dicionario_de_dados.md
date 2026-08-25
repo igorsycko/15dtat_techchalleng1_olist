@@ -215,7 +215,7 @@ avaliação (proxy de risco de não-recompra) — conecta as duas trilhas em uma
 | Queda percentual na nota (atrasado vs. no prazo) | 40,2% |
 | **Receita em risco** | **R$ 466.199,44** |
 
-Lembrete de correlação x causalidade (Aula 1 de Estatística): a diferença de
+Lembrete de correlação x causalidade: a diferença de
 nota entre pedidos no prazo e atrasados é grande e provavelmente relevante, mas
 o relatório final deve deixar claro que é uma associação observacional — outros
 fatores (categoria, região, valor do pedido) podem influenciar os dois lados.

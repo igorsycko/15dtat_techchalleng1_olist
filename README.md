@@ -34,7 +34,8 @@ tech-challenge-olist/
 ├── notebooks/
 │   ├── 01_compreensao_dos_dados.ipynb
 │   ├── 02_preparacao_dos_dados.ipynb
-│   └── 03_kpis_principais.ipynb
+│   ├── 03_kpis_principais.ipynb
+│   └── 04_analise_crescimento_receita.ipynb
 ├── documentos/
 │   ├── dicionario_de_dados.md
 │   └── data_quality_summary.csv
