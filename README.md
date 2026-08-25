@@ -38,6 +38,7 @@ tech-challenge-olist/
 │   └── 04_analise_crescimento_receita.ipynb
 ├── documentos/
 │   ├── dicionario_de_dados.md
+│   ├── modelo_dimensional.svg
 │   └── data_quality_summary.csv
 ├── requerimentos.txt
 └── README.md
@@ -74,9 +75,10 @@ Compreensão dos Dados, Preparação, Análise/Modelagem, Avaliação e Entrega.
 
 ## Escopo deste Repositório
 
-Este repositório cobre a etapa de dados do case: compreensão, tratamento e
-modelagem dimensional da base da Olist, documentadas em
-`documentos/dicionario_de_dados.md`. A tabela fato e as dimensões geradas aqui
-(`data/processado/`) são a base para as análises de Crescimento e Receita e de
-Logística e SLA, e para a construção do relatório executivo, da apresentação e
-do vídeo destinados aos investidores.
+Este repositório cobre a etapa de dados do case (compreensão, tratamento e
+modelagem dimensional, documentadas em `documentos/dicionario_de_dados.md`) e a
+análise da trilha de Crescimento e Receita, já completa em
+`notebooks/04_analise_crescimento_receita.ipynb`. A tabela fato e as dimensões
+em `data/processado/` também servem de base para a análise de Logística e SLA
+e para a construção do relatório executivo, da apresentação e do vídeo
+destinados aos investidores.

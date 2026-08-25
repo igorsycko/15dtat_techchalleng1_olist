@@ -1,7 +1,8 @@
 # Dicionário de Dados e Racional Técnico — Case Olist
 
 Documentação de referência das 9 tabelas do dataset e das decisões técnicas dos
-notebooks de compreensão e preparação dos dados. Fonte: [Kaggle — Brazilian E-Commerce
+quatro notebooks do projeto (compreensão dos dados, preparação/modelagem, KPIs
+e análise de Crescimento e Receita). Fonte: [Kaggle — Brazilian E-Commerce
 Public Dataset by Olist](https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce).
 
 Validado com os dados reais em 11/08/2026, com os KPIs consolidados a partir
@@ -42,7 +43,7 @@ de recompra** identificável — baixo para uma narrativa de retenção.
 | order_purchase_timestamp | datetime | Data/hora da compra — 0% nulos | — |
 | order_approved_at | datetime | Data/hora da aprovação — 0,16% nulos | — |
 | order_delivered_carrier_date | datetime | Data de postagem — 1,79% nulos | — |
-| order_delivered_customer_date | datetime | Data real de entrega — 2,98% nulos (só em pedidos não `delivered`) | — |
+| order_delivered_customer_date | datetime | Data real de entrega — 2,98% nulos (quase só em pedidos não `delivered`; 8 exceções com status `delivered` e data nula) | — |
 | order_estimated_delivery_date | datetime | Data estimada de entrega — 0% nulos | — |
 
 Uso principal: lead time e atraso = `order_delivered_customer_date` −
@@ -78,7 +79,7 @@ Achado: média de 1,14 item por pedido (máximo 21) — a maioria dos pedidos te
 |---|---|---|---|
 | review_id | texto | ID da avaliação | PK |
 | order_id | texto | Referência ao pedido | FK → orders |
-| review_score | inteiro (1–5) | Nota do cliente — média geral 4,16 (pedidos entregues, ver seção 3) | — |
+| review_score | inteiro (1–5) | Nota do cliente — média bruta 4,09 (todas as 99.224 avaliações, sem filtro); 4,16 considerando só pedidos entregues e deduplicados (ver seção 3) | — |
 | review_comment_title | texto | Título do comentário — 88,3% nulos (campo opcional) | — |
 | review_comment_message | texto | Corpo do comentário — 58,7% nulos (campo opcional) | — |
 | review_creation_date | datetime | Data de envio da pesquisa de satisfação | — |
@@ -168,8 +169,10 @@ por `order_id` separadamente.
 Calculados no notebook `03_kpis_principais.ipynb`, a partir de `data/processado/`
 (mais rigoroso que uma exploração inicial: usa a tabela fato já modelada e
 deduplica por pedido antes de calcular médias de logística/satisfação, para não
-inflar pedidos com mais de um item). Base: 98.666 pedidos únicos, jan/2017 a
-ago/2018.
+inflar pedidos com mais de um item). Receita e volumetria usam a base completa
+(98.666 pedidos únicos); KPIs de evolução mensal (crescimento, sazonalidade)
+usam o período filtrado jan/2017-ago/2018 (98.353 pedidos), para não distorcer
+com os meses de volume quase nulo.
 
 ### Crescimento e Receita
 
@@ -227,7 +230,7 @@ fatores (categoria, região, valor do pedido) podem influenciar os dois lados.
 | Item | Status | Observação |
 |---|---|---|
 | Duplicidades | Verificado | 0 duplicadas em 8 das 9 tabelas; `geolocation` tem 261.831 linhas duplicadas (tratar na modelagem) |
-| Valores nulos críticos | Verificado | `order_delivered_customer_date` nulo só em pedidos não entregues (esperado, não é erro) |
+| Valores nulos críticos | Verificado | `order_delivered_customer_date` nulo quase só em pedidos não entregues (esperado); 8 exceções com status `delivered` e data nula, de 2.965 nulos totais — volume desprezível |
 | Nulos não-críticos | Verificado | `review_comment_title`/`review_comment_message` nulos são campos opcionais |
 | Outliers | Documentado | `price` (até R$ 6.735) e `freight_value` (até R$ 409,68) documentados via `describe()`; nenhum valor removido — decisão de tratamento fica para quando alguma análise específica precisar |
 | Consistência de datas | Verificado | 1.359 pedidos (1,37%) com postagem antes da aprovação e 23 pedidos (0,02%) com entrega antes da postagem — inconsistências pontuais nos timestamps, volume baixo o suficiente para não comprometer as análises agregadas |
@@ -239,9 +242,9 @@ fatores (categoria, região, valor do pedido) podem influenciar os dois lados.
 ## 5. Racional Técnico dos Notebooks
 
 Resumo das principais decisões de código dos notebooks `01_compreensao_dos_dados.ipynb`,
-`02_preparacao_dos_dados.ipynb` e `03_kpis_principais.ipynb`, e por que foram tomadas —
-apoio para justificar escolhas técnicas junto aos professores, no vídeo executivo ou na
-apresentação.
+`02_preparacao_dos_dados.ipynb`, `03_kpis_principais.ipynb` e
+`04_analise_crescimento_receita.ipynb`, e por que foram tomadas — apoio para justificar
+escolhas técnicas junto aos professores, no vídeo executivo ou na apresentação.
 
 | Decisão | Racional |
 |---|---|
@@ -260,6 +263,9 @@ apresentação.
 | Carregar `order_reviews` direto de `data/base/`, não de `data/processado/` | `review_score` ainda não faz parte do modelo dimensional; evita modelar uma tabela nova só para este cálculo pontual |
 | Deduplicar `fato_pedidos` por `order_id` antes de calcular KPIs de pedido (lead time, atraso, nota) | `fato_pedidos` está no grão de item; sem deduplicar, pedidos com mais de um item pesariam mais nas médias — inflando ou distorcendo o resultado |
 | Excluir set-dez/2016 e set-out/2018 do cálculo de crescimento mês a mês | Volume quase nulo nesses meses (já documentado na Cobertura Temporal) distorceria a taxa de crescimento se incluído |
+| Juntar categoria e estado direto em `fato` uma única vez, no início do notebook 04 | Evita repetir o mesmo `merge` em quase toda célula seguinte; mantém o código mais curto e menos propenso a erro de digitação no nome da coluna |
+| Comparar receita da 1ª metade vs. 2ª metade do período (em vez de regressão linear) para crescimento por categoria | Mais simples de calcular e de explicar no relatório; suficiente para o objetivo de apontar categorias em alta ou em queda |
+| Registrar o resultado contra-intuitivo do cruzamento atraso x recompra em vez de forçar a hipótese inicial | Clientes com atraso tiveram levemente mais pedidos, não menos; documentar isso honestamente (com a explicação de viés de exposição) é mais correto do que apresentar só o resultado esperado |
 
 **Como isso atende aos critérios de avaliação:**
 
