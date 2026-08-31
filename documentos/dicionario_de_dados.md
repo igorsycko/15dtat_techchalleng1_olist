@@ -1,9 +1,9 @@
 # Dicionário de Dados e Racional Técnico — Case Olist
 
 Documentação de referência das 9 tabelas do dataset e das decisões técnicas dos
-quatro notebooks do projeto (compreensão dos dados, preparação/modelagem, KPIs
-e análise de Crescimento e Receita). Fonte: [Kaggle — Brazilian E-Commerce
-Public Dataset by Olist](https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce).
+cinco notebooks do projeto (compreensão dos dados, preparação/modelagem, KPIs,
+análise de Crescimento e Receita, e análise de Logística e SLA). Fonte: [Kaggle
+— Brazilian E-Commerce Public Dataset by Olist](https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce).
 
 Validado com os dados reais em 11/08/2026, com os KPIs consolidados a partir
 do notebook `03_kpis_principais.ipynb`. Tipos, volumetria, nulos e
@@ -188,12 +188,19 @@ com os meses de volume quase nulo.
 
 ### Logística e SLA
 
+Complementado pelo notebook `05_analise_logistica_sla.ipynb`, que aprofunda
+outliers, SLA por estado e o cruzamento com satisfação.
+
 | KPI | Valor |
 |---|---|
-| Lead time médio (compra → entrega) | 12,1 dias |
+| Lead time médio (compra → entrega) | 12,6 dias |
 | Pedidos no prazo (SLA compliance) | 91,9% (8,1% atrasados) |
 | Atraso médio, entre os atrasados | 8,9 dias (7.826 pedidos) |
-| Piores estados por lead time | RR (29,0d), AP (26,7d), AM (26,0d), AL (24,0d), PA (23,3d) |
+| Piores estados por lead time | RR (29,4d), AP (27,2d), AM (26,4d), AL (24,5d), PA (23,8d) |
+| Piores estados por % de atraso (≥ 1.000 pedidos) | CE (15,3%), BA (14,0%), RJ (13,5%), ES (12,2%), PE (10,8%) |
+| Melhores estados por % de atraso (≥ 1.000 pedidos) | PR (5,0%), MG (5,6%), SP (5,9%) |
+| Outliers de lead time (IQR) | 4.896 pedidos (5,08% da base); média cai de 12,6 para 11,0 dias sem eles |
+| Outliers de atraso (IQR) | 486 pedidos (6,21% dos atrasados); média cai de 8,87 para 6,30 dias sem eles |
 | Frete médio | R$ 19,99 |
 | Frete / preço | 16,6% |
 
@@ -242,9 +249,10 @@ fatores (categoria, região, valor do pedido) podem influenciar os dois lados.
 ## 5. Racional Técnico dos Notebooks
 
 Resumo das principais decisões de código dos notebooks `01_compreensao_dos_dados.ipynb`,
-`02_preparacao_dos_dados.ipynb`, `03_kpis_principais.ipynb` e
-`04_analise_crescimento_receita.ipynb`, e por que foram tomadas — apoio para justificar
-escolhas técnicas junto aos professores, no vídeo executivo ou na apresentação.
+`02_preparacao_dos_dados.ipynb`, `03_kpis_principais.ipynb`,
+`04_analise_crescimento_receita.ipynb` e `05_analise_logistica_sla.ipynb`, e por
+que foram tomadas — apoio para justificar escolhas técnicas junto aos
+professores, no vídeo executivo ou na apresentação.
 
 | Decisão | Racional |
 |---|---|
@@ -262,10 +270,14 @@ escolhas técnicas junto aos professores, no vídeo executivo ou na apresentaç�
 | Comparar cada par de datas sequenciais de `orders` (compra/aprovação/postagem/entrega) | Confirma a ordem lógica dos timestamps; identificou 1.382 pedidos com alguma inconsistência pontual, volume baixo o suficiente para não comprometer análises agregadas |
 | Carregar `order_reviews` direto de `data/base/`, não de `data/processado/` | `review_score` ainda não faz parte do modelo dimensional; evita modelar uma tabela nova só para este cálculo pontual |
 | Deduplicar `fato_pedidos` por `order_id` antes de calcular KPIs de pedido (lead time, atraso, nota) | `fato_pedidos` está no grão de item; sem deduplicar, pedidos com mais de um item pesariam mais nas médias — inflando ou distorcendo o resultado |
+| Calcular lead time com dias fracionários (`.dt.total_seconds() / 86400`), não `.dt.days` | Padronização com a análise de Logística e SLA, que já usava esse método (mais preciso, sem truncar a parte fracionária do dia); o valor mudou de 12,1 para 12,6 dias — `atraso_dias` continua em `.dt.days`, pois as duas análises já convergiam nesse ponto |
 | Excluir set-dez/2016 e set-out/2018 do cálculo de crescimento mês a mês | Volume quase nulo nesses meses (já documentado na Cobertura Temporal) distorceria a taxa de crescimento se incluído |
 | Juntar categoria e estado direto em `fato` uma única vez, no início do notebook 04 | Evita repetir o mesmo `merge` em quase toda célula seguinte; mantém o código mais curto e menos propenso a erro de digitação no nome da coluna |
 | Comparar receita da 1ª metade vs. 2ª metade do período (em vez de regressão linear) para crescimento por categoria | Mais simples de calcular e de explicar no relatório; suficiente para o objetivo de apontar categorias em alta ou em queda |
 | Registrar o resultado contra-intuitivo do cruzamento atraso x recompra em vez de forçar a hipótese inicial | Clientes com atraso tiveram levemente mais pedidos, não menos; documentar isso honestamente (com a explicação de viés de exposição) é mais correto do que apresentar só o resultado esperado |
+| Identificar outliers de lead time e atraso com o método IQR, documentando sem remover da base | Mesmo padrão de governança já adotado para `price`/`freight_value` no notebook 02 — decisão de tratamento fica para quando alguma análise específica precisar |
+| Filtrar estados com pelo menos 1.000 pedidos antes de comparar percentual de atraso entre eles | Estados com poucos pedidos podem ter percentuais extremos só por efeito de amostra pequena, distorcendo a comparação regional |
+| Calcular receita em pedidos atrasados a partir de `fato_pedidos` (grão de item), não da base já deduplicada por pedido | Deduplicar por `order_id` antes de somar `price` descartaria itens extras de pedidos com mais de uma unidade, subestimando a receita |
 
 **Como isso atende aos critérios de avaliação:**
 
