@@ -162,6 +162,12 @@ está no grão de pedido, não de item, e juntar direto duplicaria o valor pago 
 pedidos com mais de um item. Ao precisar desse valor, agregar `order_payments`
 por `order_id` separadamente.
 
+Atenção: a coluna `atrasado` só é significativa para pedidos com `order_status
+== "delivered"`. Em pedidos não entregues, ela aparece como `False` por
+construção (a comparação de datas não se aplica), não porque o pedido chegou
+no prazo — sempre filtrar por `delivered` antes de calcular métricas de
+atraso a partir desta coluna.
+
 ---
 
 ## 3. KPIs e Achados Principais
@@ -275,6 +281,7 @@ professores, no vídeo executivo ou na apresentação.
 | Juntar categoria e estado direto em `fato` uma única vez, no início do notebook 04 | Evita repetir o mesmo `merge` em quase toda célula seguinte; mantém o código mais curto e menos propenso a erro de digitação no nome da coluna |
 | Comparar receita da 1ª metade vs. 2ª metade do período (em vez de regressão linear) para crescimento por categoria | Mais simples de calcular e de explicar no relatório; suficiente para o objetivo de apontar categorias em alta ou em queda |
 | Registrar o resultado contra-intuitivo do cruzamento atraso x recompra em vez de forçar a hipótese inicial | Clientes com atraso tiveram levemente mais pedidos, não menos; documentar isso honestamente (com a explicação de viés de exposição) é mais correto do que apresentar só o resultado esperado |
+| Filtrar `order_status == "delivered"` antes de deduplicar por pedido no cruzamento com Logística (seção 6) | Sem esse filtro, pedidos cancelados/não entregues entravam no cálculo com `atrasado = False` (em vez de indefinido), diluindo o percentual de atraso por estado — a correção alinhou os números com os do notebook 05 (ex.: SP de 5,77% para 5,89%, RJ de 13,04% para 13,47%) |
 | Identificar outliers de lead time e atraso com o método IQR, documentando sem remover da base | Mesmo padrão de governança já adotado para `price`/`freight_value` no notebook 02 — decisão de tratamento fica para quando alguma análise específica precisar |
 | Filtrar estados com pelo menos 1.000 pedidos antes de comparar percentual de atraso entre eles | Estados com poucos pedidos podem ter percentuais extremos só por efeito de amostra pequena, distorcendo a comparação regional |
 | Calcular receita em pedidos atrasados a partir de `fato_pedidos` (grão de item), não da base já deduplicada por pedido | Deduplicar por `order_id` antes de somar `price` descartaria itens extras de pedidos com mais de uma unidade, subestimando a receita |
